@@ -67,7 +67,7 @@ const addBookHandler = (req, res) => {
   return response;
 };
 
-const getBookHandler = (res) => {
+const getBookHandler = (req, res) => {
   const response = res.response({
     status: 'success',
     data: books,
@@ -76,4 +76,24 @@ const getBookHandler = (res) => {
   return response;
 };
 
-module.exports = { addBookHandler, getBookHandler };
+const getBookByIdHandler = (req, res) => {
+  const { bookId } = req.params;
+  const book = books.filter((b) => b.id === bookId)[0];
+
+  if (book !== undefined) {
+    const response = res.response({
+      status: 'success',
+      data: book,
+    });
+    response.code(200);
+    return response;
+  }
+  const response = res.response({
+    status: 'fail',
+    message: 'Buku tidak ditemukan',
+  });
+  response.code(200);
+  return response;
+};
+
+module.exports = { addBookHandler, getBookHandler, getBookByIdHandler };
