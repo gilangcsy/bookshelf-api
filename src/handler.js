@@ -24,7 +24,7 @@ const addBookHandler = (req, res) => {
     return response;
   }
 
-  const id = nanoid(16);
+  const id = nanoid();
   const insertedAt = new Date().toISOString();
   const updatedAt = insertedAt;
   const finished = pageCount === readPage;
@@ -94,14 +94,7 @@ const getBookHandler = (req, res) => {
       books: newBooks.map((book) => ({
         id: book.id,
         name: book.name,
-        year: book.year,
-        author: book.author,
-        summary: book.summary,
         publisher: book.publisher,
-        pageCount: book.pageCount,
-        readPage: book.readPage,
-        reading: book.reading,
-        finished: book.finished,
       })),
     },
   });
@@ -111,21 +104,23 @@ const getBookHandler = (req, res) => {
 
 const getBookByIdHandler = (req, res) => {
   const { bookId } = req.params;
-  const book = books.filter((b) => b.id === bookId)[0];
+  const book = books.find((item) => item.id === bookId);
 
-  if (book !== undefined) {
+  if (book === undefined) {
     const response = res.response({
-      status: 'success',
-      data: book,
+      status: 'fail',
+      message: 'Buku tidak ditemukan',
     });
-    response.code(200);
+    response.code(404);
     return response;
   }
   const response = res.response({
-    status: 'fail',
-    message: 'Buku tidak ditemukan',
+    status: 'success',
+    data: {
+      book,
+    },
   });
-  response.code(404);
+  response.code(200);
   return response;
 };
 
@@ -136,7 +131,7 @@ const editBookByIdHandler = (req, res) => {
   } = req.payload;
   const updatedAt = new Date().toISOString();
   const finished = pageCount === readPage;
-  const index = books.findIndex((b) => b.id === bookId);
+  const index = books.findIndex((book) => book.id === bookId);
 
   if (!name) {
     const response = res.response({
@@ -156,32 +151,32 @@ const editBookByIdHandler = (req, res) => {
     return response;
   }
 
-  if (index !== -1) {
-    books[index] = {
-      ...books[index],
-      name,
-      year,
-      author,
-      summary,
-      publisher,
-      pageCount,
-      readPage,
-      reading,
-      finished,
-      updatedAt,
-    };
+  if (index === -1) {
     const response = res.response({
-      status: 'success',
-      message: 'Buku berhasil diperbarui',
+      status: 'fail',
+      message: 'Gagal memperbarui buku. Id tidak ditemukan',
     });
-    response.code(200);
+    response.code(404);
     return response;
   }
+  books[index] = {
+    ...books[index],
+    name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+    reading,
+    finished,
+    updatedAt,
+  };
   const response = res.response({
-    status: 'fail',
-    message: 'Gagal memperbarui buku. Id tidak ditemukan',
+    status: 'success',
+    message: 'Buku berhasil diperbarui',
   });
-  response.code(404);
+  response.code(200);
   return response;
 };
 
